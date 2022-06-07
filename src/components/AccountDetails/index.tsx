@@ -2,13 +2,13 @@ import { injected, walletconnect } from "../../connectors"
 import { Trans } from "@lingui/macro"
 import { SUPPORTED_WALLETS } from "../../constants/wallet"
 import { Button, IconButton, Link, Stack, Text, useClipboard } from "@chakra-ui/react"
-import { useActiveWeb3React } from "../../hooks/web3"
 import styled from "styled-components"
 import WalletConnectIcon from "../../assets/images/walletConnectIcon.svg"
 import Identicon from "../Identicon"
 import { ExplorerDataType, getExplorerLink } from "../../utils/getExplorerLink"
 import { shortenAddress } from "../../utils"
 import { CopyIcon } from "@chakra-ui/icons"
+import useActiveWeb3React from "../../hooks/useActiveWeb3React";
 
 const IconWrapper = styled.div<{ size?: number }>`
   ${({ theme }) => theme.flexColumnNoWrap};

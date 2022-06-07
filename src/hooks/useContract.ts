@@ -12,7 +12,7 @@ import { useMemo } from 'react'
 import { getContract } from '../utils'
 import { Erc20, ArgentWalletDetector, Weth } from '../abis/types'
 import { WETH9_EXTENDED } from '../constants/tokens'
-import { useActiveWeb3React } from './web3'
+import useActiveWeb3React from "./useActiveWeb3React";
 
 // returns null on errors
 export function useContract<T extends Contract = Contract>(

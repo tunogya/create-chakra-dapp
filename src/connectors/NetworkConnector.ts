@@ -1,6 +1,6 @@
-import { ConnectorUpdate } from "@web3-react/types"
-import { AbstractConnector } from "@web3-react/abstract-connector"
-import invariant from "tiny-invariant"
+import invariant from 'tiny-invariant'
+import { AbstractConnector } from 'web3-react-abstract-connector'
+import { ConnectorUpdate } from 'web3-react-types'
 
 interface NetworkConnectorArguments {
   urls: { [chainId: number]: string }
@@ -23,7 +23,7 @@ class RequestError extends Error {
 }
 
 interface BatchItem {
-  request: { jsonrpc: "2.0"; id: number; method: string; params: unknown }
+  request: { jsonrpc: '2.0'; id: number; method: string; params: unknown }
   resolve: (result: any) => void
   reject: (error: Error) => void
 }
@@ -36,11 +36,14 @@ class MiniRpcProvider implements AsyncSendable {
   public readonly path: string
   public readonly batchWaitTimeMs: number
 
+  private readonly connector: NetworkConnector
+
   private nextId = 1
   private batchTimeoutId: ReturnType<typeof setTimeout> | null = null
   private batch: BatchItem[] = []
 
-  constructor(chainId: number, url: string, batchWaitTimeMs?: number) {
+  constructor(connector: NetworkConnector, chainId: number, url: string, batchWaitTimeMs?: number) {
+    this.connector = connector
     this.chainId = chainId
     this.url = url
     const parsed = new URL(url)
@@ -51,19 +54,33 @@ class MiniRpcProvider implements AsyncSendable {
   }
 
   public readonly clearBatch = async () => {
-    console.debug("Clearing batch", this.batch)
-    const batch = this.batch
+    console.debug('Clearing batch', this.batch)
+    let batch = this.batch
+
+    batch = batch.filter((b) => {
+      if (b.request.method === 'wallet_switchEthereumChain') {
+        try {
+          this.connector.changeChainId(parseInt((b.request.params as [{ chainId: string }])[0].chainId))
+          b.resolve({ id: b.request.id })
+        } catch (error: any) {
+          b.reject(error)
+        }
+        return false
+      }
+      return true
+    })
+
     this.batch = []
     this.batchTimeoutId = null
     let response: Response
     try {
       response = await fetch(this.url, {
-        method: "POST",
-        headers: { "content-type": "application/json", accept: "application/json" },
-        body: JSON.stringify(batch.map(item => item.request)),
+        method: 'POST',
+        headers: { 'content-type': 'application/json', accept: 'application/json' },
+        body: JSON.stringify(batch.map((item) => item.request)),
       })
     } catch (error) {
-      batch.forEach(({ reject }) => reject(new Error("Failed to send batch call")))
+      batch.forEach(({ reject }) => reject(new Error('Failed to send batch call')))
       return
     }
 
@@ -76,7 +93,7 @@ class MiniRpcProvider implements AsyncSendable {
     try {
       json = await response.json()
     } catch (error) {
-      batch.forEach(({ reject }) => reject(new Error("Failed to parse JSON response")))
+      batch.forEach(({ reject }) => reject(new Error('Failed to parse JSON response')))
       return
     }
     const byKey = batch.reduce<{ [id: number]: BatchItem }>((memo, current) => {
@@ -89,9 +106,9 @@ class MiniRpcProvider implements AsyncSendable {
         reject,
         request: { method },
       } = byKey[result.id]
-      if ("error" in result) {
+      if ('error' in result) {
         reject(new RequestError(result?.error?.message, result?.error?.code, result?.error?.data))
-      } else if ("result" in result && resolve) {
+      } else if ('result' in result && resolve) {
         resolve(result.result)
       } else {
         reject(new RequestError(`Received unexpected JSON-RPC response to ${method} request.`, -32000, result))
@@ -101,7 +118,7 @@ class MiniRpcProvider implements AsyncSendable {
 
   public readonly sendAsync = (
     request: {
-      jsonrpc: "2.0"
+      jsonrpc: '2.0'
       id: number | string | null
       method: string
       params?: unknown[] | Record<string, unknown>
@@ -109,24 +126,24 @@ class MiniRpcProvider implements AsyncSendable {
     callback: (error: any, response: any) => void
   ): void => {
     this.request(request.method, request.params)
-      .then(result => callback(null, { jsonrpc: "2.0", id: request.id, result }))
-      .catch(error => callback(error, null))
+      .then((result) => callback(null, { jsonrpc: '2.0', id: request.id, result }))
+      .catch((error) => callback(error, null))
   }
 
   public readonly request = async (
     method: string | { method: string; params: unknown[] },
     params?: unknown[] | Record<string, unknown>
   ): Promise<unknown> => {
-    if (typeof method !== "string") {
+    if (typeof method !== 'string') {
       return this.request(method.method, method.params)
     }
-    if (method === "eth_chainId") {
+    if (method === 'eth_chainId') {
       return `0x${this.chainId.toString(16)}`
     }
     const promise = new Promise((resolve, reject) => {
       this.batch.push({
         request: {
-          jsonrpc: "2.0",
+          jsonrpc: '2.0',
           id: this.nextId++,
           method,
           params,
@@ -145,12 +162,12 @@ export class NetworkConnector extends AbstractConnector {
   private currentChainId: number
 
   constructor({ urls, defaultChainId }: NetworkConnectorArguments) {
-    invariant(defaultChainId || Object.keys(urls).length === 1, "defaultChainId is a required argument with >1 url")
+    invariant(defaultChainId || Object.keys(urls).length === 1, 'defaultChainId is a required argument with >1 url')
     super({ supportedChainIds: Object.keys(urls).map((k): number => Number(k)) })
 
-    this.currentChainId = defaultChainId || Number(Object.keys(urls)[0])
+    this.currentChainId = defaultChainId ?? Number(Object.keys(urls)[0])
     this.providers = Object.keys(urls).reduce<{ [chainId: number]: MiniRpcProvider }>((accumulator, chainId) => {
-      accumulator[Number(chainId)] = new MiniRpcProvider(Number(chainId), urls[Number(chainId)])
+      accumulator[Number(chainId)] = new MiniRpcProvider(this, Number(chainId), urls[Number(chainId)])
       return accumulator
     }, {})
   }
@@ -177,5 +194,22 @@ export class NetworkConnector extends AbstractConnector {
 
   public deactivate() {
     return
+  }
+
+  /**
+   * Meant to be called only by MiniRpcProvider
+   * @param chainId the new chain id
+   */
+  public changeChainId(chainId: number) {
+    if (chainId in this.providers) {
+      this.currentChainId = chainId
+      this.emitUpdate({
+        chainId,
+        account: null,
+        provider: this.providers[chainId],
+      })
+    } else {
+      throw new Error(`Unsupported chain ID: ${chainId}`)
+    }
   }
 }

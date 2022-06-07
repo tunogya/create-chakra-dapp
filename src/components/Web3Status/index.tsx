@@ -13,7 +13,7 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { UnsupportedChainIdError, useWeb3React } from "@web3-react/core"
+import { UnsupportedChainIdError, useWeb3React } from "web3-react-core"
 import { isMobile } from "react-device-detect"
 import { SUPPORTED_WALLETS } from "../../constants/wallet"
 import { injected } from "../../connectors"

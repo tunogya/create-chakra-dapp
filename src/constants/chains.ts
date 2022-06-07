@@ -44,6 +44,7 @@ interface L1ChainInfo {
   readonly explorer: string
   readonly infoLink: string
   readonly label: string
+  readonly nativeSymbol: string
 }
 export interface L2ChainInfo extends L1ChainInfo {
   readonly bridge: string
@@ -63,6 +64,7 @@ export const CHAIN_INFO: ChainInfo = {
     infoLink: '',
     label: 'Arbitrum',
     logoUrl: arbitrumLogoUrl,
+    nativeSymbol: 'ETH'
   },
   [SupportedChainId.ARBITRUM_RINKEBY]: {
     bridge: 'https://bridge.arbitrum.io/',
@@ -71,35 +73,41 @@ export const CHAIN_INFO: ChainInfo = {
     infoLink: '',
     label: 'Arbitrum Rinkeby',
     logoUrl: arbitrumLogoUrl,
+    nativeSymbol: 'ETH'
   },
   [SupportedChainId.MAINNET]: {
     docs: 'https://docs.uniswap.org/',
     explorer: 'https://etherscan.io/',
     infoLink: '',
     label: 'Mainnet',
+    nativeSymbol: 'ETH'
   },
   [SupportedChainId.RINKEBY]: {
     docs: 'https://docs.uniswap.org/',
     explorer: 'https://rinkeby.etherscan.io/',
     infoLink: '',
     label: 'Rinkeby',
+    nativeSymbol: 'ETH'
   },
   [SupportedChainId.ROPSTEN]: {
     docs: 'https://docs.uniswap.org/',
     explorer: 'https://ropsten.etherscan.io/',
     infoLink: '',
     label: 'Ropsten',
+    nativeSymbol: 'ETH'
   },
   [SupportedChainId.KOVAN]: {
     docs: 'https://docs.uniswap.org/',
     explorer: 'https://kovan.etherscan.io/',
     infoLink: '',
     label: 'Kovan',
+    nativeSymbol: 'ETH'
   },
   [SupportedChainId.GOERLI]: {
     docs: 'https://docs.uniswap.org/',
     explorer: 'https://goerli.etherscan.io/',
     infoLink: '',
     label: 'Görli',
+    nativeSymbol: 'ETH'
   },
 }

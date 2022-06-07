@@ -1,9 +1,9 @@
-import {useActiveWeb3React} from "./web3"
 import {isAddress} from "../utils"
 import {BigNumber, ethers} from 'ethers'
 import {useEffect, useState} from "react";
 import {IDLE, IDLE_DELAY, PROCESSING} from "../constants/status";
 import useInterval from '@use-it/interval'
+import useActiveWeb3React from "./useActiveWeb3React";
 
 export const useETHBalance = (uncheckedAddresses: string | null | undefined) => {
   const {library} = useActiveWeb3React()

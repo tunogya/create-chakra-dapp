@@ -1,9 +1,9 @@
 import {
   Stack, Text,
 } from "@chakra-ui/react"
-import {useActiveWeb3React} from "../../hooks/web3"
 import {isAddress, shortenAddress} from "../../utils"
 import {useETHBalance} from "../../hooks/useETHBalance"
+import useActiveWeb3React from "../../hooks/useActiveWeb3React";
 
 export const Wallet = () => {
   const {account, chainId} = useActiveWeb3React()

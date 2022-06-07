@@ -1,6 +1,6 @@
 import React, { StrictMode } from "react"
 import ReactDOM from "react-dom"
-import { createWeb3ReactRoot, Web3ReactProvider } from "@web3-react/core"
+import { createWeb3ReactRoot, Web3ReactProvider } from "web3-react-core"
 import App from "./pages/App"
 import { NetworkContextName } from "./constants/misc"
 import { RecoilRoot } from "recoil"
@@ -9,7 +9,6 @@ import reportWebVitals from "./reportWebVitals"
 import { ChakraProvider } from "@chakra-ui/react"
 import theme from "./theme"
 import { LanguageProvider } from "./i18n"
-import Blocklist from "./components/Blocklist"
 import getLibrary from "./utils/getLibrary"
 import 'focus-visible/dist/focus-visible'
 import { createGlobalStyle } from 'styled-components';
@@ -27,10 +26,6 @@ if (!!window.ethereum) {
   window.ethereum.autoRefreshOnNetworkChange = false
 }
 
-const Updaters = () => {
-  return <></>
-}
-
 ReactDOM.render(
   <StrictMode>
     <RecoilRoot>
@@ -40,10 +35,7 @@ ReactDOM.render(
           <LanguageProvider>
             <Web3ReactProvider getLibrary={getLibrary}>
               <Web3ProviderNetwork getLibrary={getLibrary}>
-                <Blocklist>
-                  <Updaters />
-                  <App />
-                </Blocklist>
+                <App />
               </Web3ProviderNetwork>
             </Web3ReactProvider>
           </LanguageProvider>
