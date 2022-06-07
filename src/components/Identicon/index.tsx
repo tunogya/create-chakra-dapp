@@ -1,20 +1,9 @@
-import { useEffect, useRef } from "react"
-
-import styled from "styled-components/macro"
-
 import Jazzicon from "@metamask/jazzicon"
 import useActiveWeb3React from "../../hooks/useActiveWeb3React";
-
-const StyledIdenticonContainer = styled.div`
-  height: 1rem;
-  width: 1rem;
-  border-radius: 1.125rem;
-  background-color: ${({ theme }) => theme.bg4};
-`
+import {useEffect, useRef} from "react";
 
 export default function Identicon() {
   const ref = useRef<HTMLDivElement>()
-
   const { account } = useActiveWeb3React()
 
   useEffect(() => {
@@ -25,5 +14,5 @@ export default function Identicon() {
   }, [account])
 
   // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/30451
-  return <StyledIdenticonContainer ref={ref as any} />
+  return <div ref={ref as any} />
 }
